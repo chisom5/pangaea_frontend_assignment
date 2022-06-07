@@ -1,0 +1,25 @@
+{
+  "files": {
+    "main.css": "/pangaea_frontend_assignment/static/css/main.ed0fed4d.chunk.css",
+    "main.js": "/pangaea_frontend_assignment/static/js/main.25031981.chunk.js",
+    "main.js.map": "/pangaea_frontend_assignment/static/js/main.25031981.chunk.js.map",
+    "runtime-main.js": "/pangaea_frontend_assignment/static/js/runtime-main.b5fa16bd.js",
+    "runtime-main.js.map": "/pangaea_frontend_assignment/static/js/runtime-main.b5fa16bd.js.map",
+    "static/css/2.eaa9b1be.chunk.css": "/pangaea_frontend_assignment/static/css/2.eaa9b1be.chunk.css",
+    "static/js/2.f42702f1.chunk.js": "/pangaea_frontend_assignment/static/js/2.f42702f1.chunk.js",
+    "static/js/2.f42702f1.chunk.js.map": "/pangaea_frontend_assignment/static/js/2.f42702f1.chunk.js.map",
+    "static/js/3.14162c01.chunk.js": "/pangaea_frontend_assignment/static/js/3.14162c01.chunk.js",
+    "static/js/3.14162c01.chunk.js.map": "/pangaea_frontend_assignment/static/js/3.14162c01.chunk.js.map",
+    "index.html": "/pangaea_frontend_assignment/index.html",
+    "static/css/2.eaa9b1be.chunk.css.map": "/pangaea_frontend_assignment/static/css/2.eaa9b1be.chunk.css.map",
+    "static/css/main.ed0fed4d.chunk.css.map": "/pangaea_frontend_assignment/static/css/main.ed0fed4d.chunk.css.map",
+    "static/js/2.f42702f1.chunk.js.LICENSE.txt": "/pangaea_frontend_assignment/static/js/2.f42702f1.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.b5fa16bd.js",
+    "static/css/2.eaa9b1be.chunk.css",
+    "static/js/2.f42702f1.chunk.js",
+    "static/css/main.ed0fed4d.chunk.css",
+    "static/js/main.25031981.chunk.js"
+  ]
+}
