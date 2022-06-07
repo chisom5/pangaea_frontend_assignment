@@ -2,10 +2,10 @@ import React from "react";
 import { Button } from "antd";
 import { PlusOutlined, MinusOutlined, CloseOutlined } from "@ant-design/icons";
 
-const ButtonGroup = Button.Group;
-
 const CartListItem = ({
   item,
+  data,
+  selectedCurrency,
   removeItemFromCart,
   increaseItemQuantity,
   reduceItemFromCart,
@@ -14,46 +14,53 @@ const CartListItem = ({
     <div className="cart-list-item">
       <div className="content">
         <div>
-          <h4 className="title">{item.title}</h4>
+          <div className="cart-item-desc">
+            <h4 className="title">{item.title}</h4>
 
-          <div>
-            <span role="button" className="quantity">
-              <strong>Qty:</strong>
-              {item.quantity}
-            </span> 
-            <span>
-              <strong> &nbsp; Amt:</strong>
-              {item.price.toFixed(2)}
+            <span onClick={removeItemFromCart}>
+              <CloseOutlined />
             </span>
+          </div>
+
+          <div className="cart-item-desc">
+            <p>Two month supply shipped every two months</p>
+            {/* img */}
+            <div id="cart-item-img">
+              <img src={item.image_url} alt="product_img" />
+            </div>
           </div>
         </div>
       </div>
 
       <div className="action">
         {increaseItemQuantity && (
-          <ButtonGroup style={{ display: "flex" }}>
+          <div className="btn-actions">
             <Button
               icon={<PlusOutlined />}
+              className="btn-mr btn-noBorder"
               onClick={() => {
                 increaseItemQuantity(item, 1);
               }}
-              disabled={Number(item.original_price) === 0}
             />
+
+            <p>{item.quantity}</p>
+
             <Button
               icon={<MinusOutlined />}
+              className="btn-ml btn-noBorder"
               onClick={() => {
                 reduceItemFromCart(item);
               }}
-              disabled={Number(item.original_price) === 0}
             />
-            <Button
-              icon={<CloseOutlined />}
-              onClick={() => {
-                removeItemFromCart(item);
-              }}
-            />
-          </ButtonGroup>
+          </div>
         )}
+
+        <span>
+          {data && data.products ? item.price.toLocaleString("en-US", {
+            style: "currency",
+            currency: selectedCurrency,
+          }) : item.price}
+        </span>
       </div>
     </div>
   );

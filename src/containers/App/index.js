@@ -1,22 +1,27 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+// ui component
 import Header from "../../components/header";
-import ContentHeader from "../../components/header/contentHeader";
-import ProductItem from "./components/productItem";
-import { Drawer } from "antd";
+import ContentHeader from "../../components/contentHeader";
+import Products from "../../components/products";
+import DrawerComponent from "../../components/drawer";
+import CartListItem from "../../components/cartItem";
+import FilterSelectComponent from "../../components/filterCurrency";
+//
 import update from "immutability-helper";
-import CartListItem from "./components/addToCartItem";
-import { gql, useQuery } from "@apollo/client";
 import { Spin, Result } from "antd";
 import { LoadingOutlined } from "@ant-design/icons";
+// utility
+import { gql, useQuery } from "@apollo/client";
 
-const Product = () => {
+const App = () => {
   const [openCart, setOpenCart] = useState(false);
   const [cartList, setCartList] = useState([]);
   const [selectedCurrency, setSelectedCurrency] = useState("USD");
-  const [itemPrice, setItemPrice] = useState(null);
+  const [itemPrice, setItemPrice] = useState("");
+  const [totalAmount, setTotalAmount] = useState(0);
 
   const FETCH_PRODUCTS = gql`
-  query {
+  query Products {
     products {
       id
       title
@@ -26,16 +31,55 @@ const Product = () => {
   }
 `;
   const FETCH_CURRENCY = gql`
-    query {
+    query Currency {
       currency
     }
   `;
+
+  const { loading, error, data } = useQuery(FETCH_PRODUCTS);
+  const currencyRes = useQuery(FETCH_CURRENCY);
+console.log(currencyRes);
+
+  // console.log(currencyRes);
+  const getTotalAmount = useCallback(() => {
+    let tAmount = 0;
+    for (let x = 0; x < cartList.length; x++) {
+      tAmount += cartList[x].price;
+    }
+    return tAmount;
+  }, [cartList]);
+
+  useEffect(() => {
+    if (cartList.length !== 0 && data !== undefined) {
+      let newItemPrice;
+
+      for (let i = 0; i < data.products.length; i++) {
+        let product_i = data.products[i];
+        for (let x = 0; x < cartList.length; x++) {
+          if (cartList[x].id === product_i.id) {
+            cartList[x].price = cartList[x].quantity * product_i.price;
+            newItemPrice = product_i.price;
+          }
+        }
+      }
+
+      setItemPrice(newItemPrice);
+      setTotalAmount(getTotalAmount());
+    }
+  }, [selectedCurrency, data, cartList, getTotalAmount]);
+
+  useEffect(() => {
+    setTotalAmount(getTotalAmount());
+  }, [getTotalAmount]);
+
   const onCloseDrawer = () => {
     setOpenCart(false);
   };
+
   const openDrawerCart = () => {
     setOpenCart(true);
   };
+
   const addProductToCart = (item, val = 1) => {
     if (cartList.filter((list) => list.id === item.id).length !== 0) {
       const index = cartList.findIndex((cart) => cart.id === item.id);
@@ -59,9 +103,11 @@ const Product = () => {
           $push: [newObj],
         })
       );
-      setItemPrice(item.price);
-    }
 
+      if (itemPrice !== item.price) {
+        setItemPrice(item.price);
+      }
+    }
     setOpenCart(true);
   };
   const removeItemFromCart = (item) => {
@@ -72,6 +118,7 @@ const Product = () => {
       })
     );
   };
+
   const reduceItemFromCart = (item) => {
     const index = cartList.findIndex((cart) => cart.id === item.id);
     // if the current quantity is 1 remove item
@@ -100,35 +147,37 @@ const Product = () => {
       );
     }
   };
+
   const onFilterCurrency = (val) => {
     setSelectedCurrency(val);
   };
 
-  let totalAmount = 0;
-
-  for (let x = 0; x < cartList.length; x++) {
-    totalAmount += cartList[x].price;
-  }
-  const { loading, error, data } = useQuery(FETCH_PRODUCTS);
-  const currencyRes = useQuery(FETCH_CURRENCY);
   return (
     <div>
-      <Header openDrawerCart={openDrawerCart} noOfItemInCart={cartList.length}/>
+      <Header
+        openDrawerCart={openDrawerCart}
+        noOfItemInCart={cartList.length}
+      />
       <section className="content">
         <ContentHeader
           selectedCurrency={selectedCurrency}
-          countriesCode={
-            currencyRes &&
-            currencyRes.data !== undefined &&
-            currencyRes.data.currency
+          component={
+            <FilterSelectComponent
+              countriesCode={
+                currencyRes &&
+                currencyRes.data !== undefined &&
+                currencyRes.data.currency
+              }
+              onSelectedCurrency={onFilterCurrency}
+            />
           }
-          onSelectedCurrency={onFilterCurrency}
         />
         <div className="product__container">
           {loading ? (
             <div className="spinner">
               <Spin
                 size="small"
+                data-testid="spinner"
                 indicator={
                   <LoadingOutlined
                     style={{ fontSize: 24, color: "#00A3A1" }}
@@ -144,46 +193,40 @@ const Product = () => {
               subTitle="Sorry, something went wrong."
             />
           ) : (
-            <ProductItem
-              products={data && data.products}
-              selectedCurrency={selectedCurrency}
-              addProductToCart={addProductToCart}
+            <Products productArr={data} 
+            selectedCurrency={selectedCurrency}
+            addProductToCart={addProductToCart}
             />
           )}
         </div>
       </section>
       {/* drawer */}
-      <Drawer
-        title="Cart Item"
-        placement="right"
-        onClose={onCloseDrawer}
-        visible={openCart}
-      >
-        <div>
-          {cartList.map((item, i) => {
-            return (
-              <CartListItem
-                key={i}
-                item={item}
-                removeItemFromCart={removeItemFromCart}
-                increaseItemQuantity={addProductToCart}
-                reduceItemFromCart={reduceItemFromCart}
-              />
-            );
-          })}
-        </div>
-
-        {/* footer drawer */}
-        {cartList.length !== 0 && (
-          <div className="checkout-btn">
-            <button type="button" size="large" id="checkout">
-              Total {`${selectedCurrency} ${totalAmount.toFixed(2)}`}
-            </button>
-          </div>
-        )}
-      </Drawer>
+      <DrawerComponent
+        onCloseDrawer={onCloseDrawer}
+        openCart={openCart}
+        cartList={cartList}
+        selectedCurrency={selectedCurrency}
+        totalAmount={totalAmount}
+        countriesCode={
+          currencyRes &&
+          currencyRes.data !== undefined &&
+          currencyRes.data.currency
+        }
+        onSelectedCurrency={onFilterCurrency}
+        component={cartList.map((item) => (
+          <CartListItem
+            item={item}
+            key={item.id}
+            data={data}
+            selectedCurrency={selectedCurrency}
+            removeItemFromCart={removeItemFromCart}
+            increaseItemQuantity={addProductToCart}
+            reduceItemFromCart={reduceItemFromCart}
+          />
+        ))}
+      />
     </div>
   );
 };
 
-export default Product;
+export default App;
